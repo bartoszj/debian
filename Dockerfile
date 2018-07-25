@@ -9,7 +9,7 @@ RUN chmod g=u /etc/passwd
 RUN apt-get update \
  && apt-get install -y bash-completion vim procps htop dnsutils whois wget curl links2 lynx telnet \
     apt-file lshw git openssh-client netcat netcat-openbsd \
-    mysql-client postgresql-client mongodb-clients redis-tools \
+    mysql-client postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-file update \
 
  && curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \

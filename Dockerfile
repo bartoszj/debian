@@ -9,6 +9,7 @@ RUN chmod g=u /etc/passwd
 RUN apt-get update \
  && apt-get install -y bash-completion vim procps htop dnsutils whois wget curl links2 lynx telnet \
     apt-file lshw git openssh-client netcat netcat-openbsd \
+    jq jid \
     mysql-client postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-file update \
 

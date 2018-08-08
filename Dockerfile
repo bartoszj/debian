@@ -8,7 +8,7 @@ WORKDIR ${HOME}
 RUN chmod g=u /etc/passwd
 RUN apt-get update \
  && apt-get install -y bash-completion vim procps htop dstat dnsutils whois wget curl links2 lynx telnet \
-    apt-file lshw git openssh-client netcat netcat-openbsd \
+    apt-file unzip lshw git openssh-client netcat netcat-openbsd \
     jq jid groff \
     mysql-client postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-file update \

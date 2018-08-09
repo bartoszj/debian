@@ -17,6 +17,12 @@ RUN apt-get update \
  && chmod +x ./kubectl \
  && mv ./kubectl /usr/local/bin/ \
 
+ && HELM_VERSION="v2.9.1" \
+ && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
+ && chmod 700 get_helm.sh \
+ && ./get_helm.sh --version "${HELM_VERSION}" \
+ && rm get_helm.sh \
+
  && OC_VERSION="v3.9.0" \
  && OC_VERSION_HASH="191fece" \
  && wget -O openshift-origin-cli.tar.gz https://github.com/openshift/origin/releases/download/${OC_VERSION}/openshift-origin-client-tools-${OC_VERSION}-${OC_VERSION_HASH}-linux-64bit.tar.gz \
@@ -25,12 +31,6 @@ RUN apt-get update \
  && mv openshift-origin-cli/oc /usr/local/bin/ \
  && rm -f openshift-origin-cli.tar.gz \
  && rm -rf openshift-origin-cli \
-
- && HELM_VERSION="v2.9.1" \
- && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
- && chmod 700 get_helm.sh \
- && ./get_helm.sh --version "${HELM_VERSION}" \
- && rm get_helm.sh \
  
  && mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

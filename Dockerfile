@@ -25,6 +25,12 @@ RUN apt-get update \
  && mv openshift-origin-cli/oc /usr/local/bin/ \
  && rm -f openshift-origin-cli.tar.gz \
  && rm -rf openshift-origin-cli \
+
+ && HELM_VERSION="v2.9.1" \
+ && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
+ && chmod 700 get_helm.sh \
+ && ./get_helm.sh --version "${HELM_VERSION}" \
+ && rm get_helm.sh \
  
  && mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

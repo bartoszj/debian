@@ -10,7 +10,7 @@ RUN apt-get update \
  && apt-get install -y bash-completion vim procps htop dstat dnsutils whois wget curl links2 lynx telnet \
     apt-file unzip lshw git openssh-client netcat netcat-openbsd \
     jq jid groff \
-    mysql-client postgresql-client mongodb-clients redis-tools apache2-utils \
+    mysql-client mysql-server postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-file update \
 
  && curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl \

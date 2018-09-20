@@ -3,6 +3,8 @@
 FROM debian:latest
 LABEL maintainer Bartosz Janda, bjanda@pgs-soft.com
 ENV HOME /home/debian
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd

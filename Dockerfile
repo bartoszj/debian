@@ -10,7 +10,7 @@ WORKDIR ${HOME}
 RUN chmod g=u /etc/passwd
 RUN apt-get update \
  && apt-get install --yes bash-completion vim procps htop dstat dnsutils whois wget curl telnet \
-    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli \
+    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 \
     jq jid groff \
     mysql-client mysql-server mycli postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-get install --yes --no-install-recommends links2 lynx \

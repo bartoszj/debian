@@ -10,7 +10,7 @@ WORKDIR ${HOME}
 RUN chmod g=u /etc/passwd
 RUN apt-get update \
  && apt-get install --yes bash-completion vim procps htop dstat dnsutils whois wget curl telnet \
-    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 \
+    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 kafkacat \
     jq jid groff \
     mysql-client mysql-server mycli postgresql-client mongodb-clients redis-tools apache2-utils \
  && apt-get install --yes --no-install-recommends links2 lynx \
@@ -20,7 +20,7 @@ RUN apt-get update \
  && chmod +x ./kubectl \
  && mv ./kubectl /usr/local/bin/ \
  # Helm
- && HELM_VERSION="v2.12.2" \
+ && HELM_VERSION="v2.13.1" \
  && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
  && chmod 700 get_helm.sh \
  && ./get_helm.sh --version "${HELM_VERSION}" \
@@ -34,6 +34,10 @@ RUN apt-get update \
  && mv openshift-origin-cli/oc /usr/local/bin/ \
  && rm -f openshift-origin-cli.tar.gz \
  && rm -rf openshift-origin-cli \
+ # Bombardier
+ && BOMBARDIER_VERSION="v1.2.4" \
+ && wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-amd64 -O /usr/local/bin/bombardier \
+ && chmod 755 /usr/local/bin/bombardier \
  # User dir settings
  && mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

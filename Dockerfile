@@ -14,7 +14,7 @@ RUN apt update \
     python3 python3-pip python-pip \
     jq jid \
     # groff
-    mariadb-client mycli postgresql-client redis-tools apache2-utils \
+    mariadb-client mariadb-server mycli postgresql-client redis-tools apache2-utils \
  && apt install --yes --no-install-recommends links2 lynx \
  && apt-file update
 
@@ -69,17 +69,17 @@ RUN apt update \
  && wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-amd64 -O /usr/local/bin/bombardier \
  && chmod 755 /usr/local/bin/bombardier
 
- # Elasticsearch Stress Test
- RUN curl -s https://raw.githubusercontent.com/logzio/elasticsearch-stress-test/master/elasticsearch-stress-test.py -o /usr/local/bin/elasticsearch-stress-test \
- && chmod 755 /usr/local/bin/elasticsearch-stress-test \
- && pip install elasticsearch
+ # # Elasticsearch Stress Test
+ # RUN curl -s https://raw.githubusercontent.com/logzio/elasticsearch-stress-test/master/elasticsearch-stress-test.py -o /usr/local/bin/elasticsearch-stress-test \
+ # && chmod 755 /usr/local/bin/elasticsearch-stress-test \
+ # && pip install elasticsearch
 
- # ES Rally
- RUN pip3 install esrally
+ # # ES Rally
+ # RUN pip3 install esrally
 
- # RabbitMQ Perf Test
- RUN curl -sL https://github.com/rabbitmq/rabbitmq-perf-test/releases/download/v2.8.1/perf-test_linux_x86_64 -o /usr/local/bin/rabbit-perf-test \
- && chmod 755 /usr/local/bin/rabbit-perf-test
+ # # RabbitMQ Perf Test
+ # RUN curl -sL https://github.com/rabbitmq/rabbitmq-perf-test/releases/download/v2.8.1/perf-test_linux_x86_64 -o /usr/local/bin/rabbit-perf-test \
+ # && chmod 755 /usr/local/bin/rabbit-perf-test
 
  # User dir settings
  RUN mkdir -p ${HOME} \

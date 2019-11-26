@@ -10,7 +10,7 @@ WORKDIR ${HOME}
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt install --yes apt-transport-https bash-completion vim procps htop dstat dnsutils gnupg whois wget curl telnet \
-    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 kafkacat \
+    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat \
     python3 python3-pip python-pip \
     jq jid \
     # groff

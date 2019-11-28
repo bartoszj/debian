@@ -10,7 +10,7 @@ WORKDIR ${HOME}
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt install --yes apt-transport-https bash-completion vim procps htop dstat dnsutils gnupg whois wget curl telnet \
-    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat \
+    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python3-pip python-pip \
     jq jid \
     # groff
@@ -54,15 +54,15 @@ RUN apt update \
  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
  && apt update && apt install --yes google-cloud-sdk
 
- # OpenShift CLI
- RUN OC_VERSION="v3.11.0" \
- && OC_VERSION_HASH="0cbc58b" \
- && wget -O openshift-origin-cli.tar.gz https://github.com/openshift/origin/releases/download/${OC_VERSION}/openshift-origin-client-tools-${OC_VERSION}-${OC_VERSION_HASH}-linux-64bit.tar.gz \
- && mkdir openshift-origin-cli || true \
- && tar -zxvf openshift-origin-cli.tar.gz --directory openshift-origin-cli --strip-components=1 \
- && mv openshift-origin-cli/oc /usr/local/bin/ \
- && rm -f openshift-origin-cli.tar.gz \
- && rm -rf openshift-origin-cli
+ # # OpenShift CLI
+ # RUN OC_VERSION="v3.11.0" \
+ # && OC_VERSION_HASH="0cbc58b" \
+ # && wget -O openshift-origin-cli.tar.gz https://github.com/openshift/origin/releases/download/${OC_VERSION}/openshift-origin-client-tools-${OC_VERSION}-${OC_VERSION_HASH}-linux-64bit.tar.gz \
+ # && mkdir openshift-origin-cli || true \
+ # && tar -zxvf openshift-origin-cli.tar.gz --directory openshift-origin-cli --strip-components=1 \
+ # && mv openshift-origin-cli/oc /usr/local/bin/ \
+ # && rm -f openshift-origin-cli.tar.gz \
+ # && rm -rf openshift-origin-cli
 
  # Bombardier
  RUN BOMBARDIER_VERSION="v1.2.4" \

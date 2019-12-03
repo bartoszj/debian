@@ -1,6 +1,6 @@
 # docker build -t bartoszj/debian .
 
-FROM debian:latest
+FROM debian:testing
 LABEL maintainer Bartosz Janda, bjanda@pgs-soft.com
 ENV HOME /home/debian
 ENV LC_ALL C.UTF-8
@@ -9,7 +9,7 @@ WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
- && apt install --yes apt-transport-https bash-completion vim procps htop dstat dnsutils gnupg whois wget curl telnet \
+ && apt install --yes apt-transport-https bash-completion lsb-release vim procps htop dstat dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python3-pip python-pip \
     jq jid \
@@ -17,6 +17,9 @@ RUN apt update \
     mariadb-client mariadb-server mycli postgresql-client redis-tools apache2-utils \
  && apt install --yes --no-install-recommends links2 lynx \
  && apt-file update
+
+ # Fix Mariadb charset
+ RUN sed -i"" -e "s|default-character-set|# default-character-set|g" /etc/mysql/mariadb.conf.d/50-client.cnf
 
  # MongoDB
  RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5 \
@@ -49,7 +52,8 @@ RUN apt update \
  && rm get_helm.sh
 
  # Google Cloud SDK
- RUN CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" \
+ # RUN CLOUD_SDK_REPO="cloud-sdk-$(lsb_release -c -s)" \
+ RUN CLOUD_SDK_REPO="cloud-sdk-buster" \
  && echo "deb http://packages.cloud.google.com/apt $CLOUD_SDK_REPO main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
  && apt update && apt install --yes google-cloud-sdk

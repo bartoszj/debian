@@ -85,6 +85,12 @@ RUN apt update \
  # RUN curl -sL https://github.com/rabbitmq/rabbitmq-perf-test/releases/download/v2.8.1/perf-test_linux_x86_64 -o /usr/local/bin/rabbit-perf-test \
  # && chmod 755 /usr/local/bin/rabbit-perf-test
 
+ # JMX Term
+ RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.0.1_all.deb -O \
+  && apt install --yes openjdk-11-jre-headless \
+  && apt install ./jmxterm*deb \
+  && rm jmxterm*deb
+
  # User dir settings
  RUN mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

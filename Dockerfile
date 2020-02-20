@@ -90,6 +90,11 @@ RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.
  && apt install ./jmxterm*deb \
  && rm jmxterm*deb
 
+# RabbitMQ Admin
+RUN curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.8.2/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \
+ && chmod 755 /usr/local/bin/rabbitmqadmin \
+ && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
+
 # User dir settings
 RUN mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

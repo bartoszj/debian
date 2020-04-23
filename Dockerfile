@@ -11,7 +11,7 @@ RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt install --yes apt-transport-https bash-completion lsb-release vim procps htop dstat dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
-    python3 python3-pip python-pip \
+    python3 python3-pip \
     jq jid \
     # groff
     mariadb-client mariadb-server mycli postgresql-client redis-tools apache2-utils \
@@ -44,12 +44,12 @@ RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /u
  && curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash -o /etc/bash_completion.d/kubens \
  && curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash -o /etc/bash_completion.d/kubectx
 
-# Helm
-RUN HELM_VERSION="v2.13.1" \
- && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
- && chmod 700 get_helm.sh \
- && ./get_helm.sh --version "${HELM_VERSION}" \
- && rm get_helm.sh
+# # Helm
+# RUN HELM_VERSION="v2.13.1" \
+#  && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
+#  && chmod 700 get_helm.sh \
+#  && ./get_helm.sh --version "${HELM_VERSION}" \
+#  && rm get_helm.sh
 
 # Google Cloud SDK
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \

@@ -1,0 +1,11 @@
+**/credentials*
+**/.git
+**/.gitignore
+**/.idea
+**/.devspace
+**/devspace.yaml
+**/__pycache__
+Dockerfile
+LICENSE
+Makefile
+.dockerignore

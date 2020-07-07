@@ -11,7 +11,7 @@ RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt install --yes apt-transport-https bash-completion lsb-release vim procps htop dstat dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
-    python3 python3-pip \
+    python3 python3-pip pipenv \
     jq jid \
     # groff
     mariadb-client mariadb-server mycli postgresql-client redis-tools apache2-utils \
@@ -103,6 +103,10 @@ RUN mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \
  && chgrp -R 0 ${HOME} \
  && chmod -R g=u ${HOME}
+
+# RabbitMQ cleaner
+COPY rabbitmq_cleaner ${HOME}/rabbitmq_cleaner
+RUN cd ${HOME}/rabbitmq_cleaner; pipenv install; pipenv install async-timeout
 
 COPY uid_entrypoint /usr/bin/
 ENTRYPOINT [ "uid_entrypoint" ]

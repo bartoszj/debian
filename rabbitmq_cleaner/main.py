@@ -113,6 +113,9 @@ if __name__ == '__main__':
                 task_bar.close()
 
             # Wait until all worker tasks are cancelled.
-            await asyncio.gather(*tasks, return_exceptions=True)
+            try:
+                await asyncio.gather(*tasks, return_exceptions=False)
+            except asyncio.exceptions.CancelledError:
+                pass
 
     loop = asyncio.run(run())

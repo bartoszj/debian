@@ -31,8 +31,10 @@ class Credentials:
 
 
 class RabbitMQAPI:
-    DELETE_QUEUE_RETRY = 3
-    DELETE_QUEUE_RETRY_SLEEP = 1
+    GET_QUEUES_RETRY = 5
+    GET_QUEUES_RETRY_SLEEP = 3
+    DELETE_QUEUE_RETRY = 5
+    DELETE_QUEUE_RETRY_SLEEP = 3
 
     def __init__(self, credentials: Credentials, base_url: str):
         conn = aiohttp.TCPConnector(limit=30)
@@ -48,16 +50,25 @@ class RabbitMQAPI:
     async def close(self):
         await self._session.close()
 
-    async def get_queues(self) -> List[Queue]:
+    async def get_queues(self, retry: int = GET_QUEUES_RETRY) -> List[Queue]:
         url = self.base_url.with_path("/api/queues")
 
-        # Get queues
-        async with self._session.get(url) as resp:
-            if resp.status != 200:
-                raise Exception(f"Unknown response code {resp.status}")
-            j = await resp.json()
-            queues = [Queue.from_dict(q) for q in j]
-            return queues
+        retry -= 1
+        try:
+            # Get queues
+            async with self._session.get(url) as resp:
+                if resp.status != 200:
+                    raise Exception(f"Unknown response code {resp.status}")
+                j = await resp.json()
+                queues = [Queue.from_dict(q) for q in j]
+                return queues
+        except asyncio.TimeoutError as err:
+            print(f"Timeout {url}")
+            if retry == 0:
+                raise Exception(f"Cannot get queues due timeout {err}")
+            else:
+                await asyncio.sleep(random.uniform(0, self.GET_QUEUES_RETRY_SLEEP))
+                return await self.get_queues(retry=retry)
 
     async def delete_queue(self, queue: Queue, retry: int = DELETE_QUEUE_RETRY):
         url = self.base_url.join(
@@ -68,7 +79,7 @@ class RabbitMQAPI:
         try:
             await self._session.delete(url)
         except asyncio.TimeoutError as err:
-            # print(f"Timeout {repository}")
+            print(f"Timeout {url}")
             if retry == 0:
                 raise Exception(f"Cannot delete queue due timeout {err}")
             else:

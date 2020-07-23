@@ -63,7 +63,7 @@ class RabbitMQAPI:
                 queues = [Queue.from_dict(q) for q in j]
                 return queues
         except asyncio.TimeoutError as err:
-            print(f"Timeout {url}")
+            # print(f"Timeout {url}")
             if retry == 0:
                 raise Exception(f"Cannot get queues due timeout {err}")
             else:
@@ -79,7 +79,7 @@ class RabbitMQAPI:
         try:
             await self._session.delete(url)
         except asyncio.TimeoutError as err:
-            print(f"Timeout {url}")
+            # print(f"Timeout {url}")
             if retry == 0:
                 raise Exception(f"Cannot delete queue due timeout {err}")
             else:

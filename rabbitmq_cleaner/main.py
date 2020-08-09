@@ -66,19 +66,21 @@ async def clean_rabbitmq(name: str, queue: asyncio.Queue, progress: tqdm.tqdm = 
 
         credentials = rabbitmq_api.Credentials(username=rabbitmq.username, password=rabbitmq.password)
         api = rabbitmq_api.RabbitMQAPI(credentials=credentials, base_url=rabbitmq.url)
-        queues = filter_queues(await api.get_queues())
 
-        if len(queues) > 0:
-            if task_progress is not None:
-                task_progress.desc = f"{name} {rabbitmq.namespace}"
-                task_progress.reset(len(queues))
+        try:
+            queues = filter_queues(await api.get_queues())
 
-            await api.delete_queues(queues, progress=task_progress)
-        await api.close()
+            if len(queues) > 0:
+                if task_progress is not None:
+                    task_progress.desc = f"{name} {rabbitmq.namespace}"
+                    task_progress.reset(len(queues))
 
-        if progress is not None:
-            progress.update()
-        queue.task_done()
+                await api.delete_queues(queues, progress=task_progress)
+        finally:
+            await api.close()
+            if progress is not None:
+                progress.update()
+            queue.task_done()
 
 
 QUEUE_WORKERS = 3

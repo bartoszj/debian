@@ -31,16 +31,17 @@ class Credentials:
 
 
 class RabbitMQAPI:
+    GET_QUEUES_TIMEOUT = 60
     GET_QUEUES_RETRY = 5
     GET_QUEUES_RETRY_SLEEP = 3
+    DELETE_QUEUE_TIMEOUT = 20
     DELETE_QUEUE_RETRY = 5
     DELETE_QUEUE_RETRY_SLEEP = 3
 
     def __init__(self, credentials: Credentials, base_url: str):
         conn = aiohttp.TCPConnector(limit=30)
-        timeout = aiohttp.ClientTimeout(total=10)
         auth = aiohttp.BasicAuth(credentials.username, credentials.password)
-        self._session = aiohttp.ClientSession(connector=conn, timeout=timeout, auth=auth)
+        self._session = aiohttp.ClientSession(connector=conn, auth=auth)
 
         self.base_url = URL(base_url)
 
@@ -52,11 +53,12 @@ class RabbitMQAPI:
 
     async def get_queues(self, retry: int = GET_QUEUES_RETRY) -> List[Queue]:
         url = self.base_url.with_path("/api/queues")
+        timeout = aiohttp.ClientTimeout(total=self.GET_QUEUES_TIMEOUT)
 
         retry -= 1
         try:
             # Get queues
-            async with self._session.get(url) as resp:
+            async with self._session.get(url, timeout=timeout) as resp:
                 if resp.status != 200:
                     raise Exception(f"Unknown response code {resp.status}")
                 j = await resp.json()
@@ -74,10 +76,11 @@ class RabbitMQAPI:
         url = self.base_url.join(
             URL(f"/api/queues/{urllib.parse.quote(queue.vhost, safe='')}/{queue.name}").with_query({"if-empty": "true", "if-unused": "true"})
         )
+        timeout = aiohttp.ClientTimeout(total=self.DELETE_QUEUE_TIMEOUT)
 
         retry -= 1
         try:
-            await self._session.delete(url)
+            await self._session.delete(url, timeout=timeout)
         except asyncio.TimeoutError as err:
             # print(f"Timeout {url}")
             if retry == 0:

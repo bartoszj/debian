@@ -95,6 +95,12 @@ RUN curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.8
  && chmod 755 /usr/local/bin/rabbitmqadmin \
  && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
 
+# go-zkcli
+RUN curl -sL https://github.com/outbrain/zookeepercli/releases/download/v1.0.12/zookeepercli-linux-amd64-binary.tar.gz -o zookeepercli-linux-amd64-binary.tar.gz \
+ && tar -zxvf zookeepercli-linux-amd64-binary.tar.gz \
+ && mv zookeepercli /usr/local/bin/ \
+ && rm -f *.tar.gz
+
 # User dir settings
 RUN mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

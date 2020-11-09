@@ -104,10 +104,6 @@ RUN mkdir -p ${HOME} \
  && chgrp -R 0 ${HOME} \
  && chmod -R g=u ${HOME}
 
-# RabbitMQ cleaner
-COPY rabbitmq_cleaner ${HOME}/rabbitmq_cleaner
-RUN cd ${HOME}/rabbitmq_cleaner; pipenv install; pipenv install async-timeout
-
 COPY uid_entrypoint /usr/bin/
 ENTRYPOINT [ "uid_entrypoint" ]
 CMD ["bash"]

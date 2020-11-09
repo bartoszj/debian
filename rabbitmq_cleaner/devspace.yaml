@@ -1,9 +1,0 @@
-version: v1beta7
-dev:
-  sync:
-    - labelSelector:
-        run: debian4
-      namespace: jenkins
-      containerPath: /home/debian/rabbit
-      excludePaths:
-      - ".git"

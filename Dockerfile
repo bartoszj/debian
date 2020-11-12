@@ -13,8 +13,8 @@ RUN apt update \
     dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python2 python-is-python3 \
-    jq jid \
-    # groff
+    jq \
+    # jid groff
     mariadb-client mycli postgresql-client redis-tools apache2-utils \
  && apt install --yes --no-install-recommends links2 lynx \
  && apt-file update \

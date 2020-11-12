@@ -9,32 +9,40 @@ WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
- && apt install --yes apt-transport-https bash-completion lsb-release vim procps htop dstat dnsutils gnupg whois wget curl telnet \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file \
+    dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
-    python3 python3-pip pipenv \
+    python3 python2 python-is-python2 \
     jq jid \
     # groff
-    mariadb-client mariadb-server mycli postgresql-client redis-tools apache2-utils \
+    mariadb-client mycli postgresql-client redis-tools apache2-utils \
  && apt install --yes --no-install-recommends links2 lynx \
- && apt-file update
+ && apt-file update \
+ && apt clean
 
 # Fix Mariadb charset
 RUN sed -i"" -e "s|default-character-set|# default-character-set|g" /etc/mysql/mariadb.conf.d/50-client.cnf
 
 # MongoDB
-RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5 \
- && echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/3.6 main" | tee /etc/apt/sources.list.d/mongodb-org-3.6.list \
- && apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4 \
- && echo "deb http://repo.mongodb.org/apt/debian stretch/mongodb-org/4.0 main" | tee /etc/apt/sources.list.d/mongodb-org-4.0.list \
+RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+ && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
  && apt update \
- && apt install --yes mongodb-org-shell mongodb-org-tools
+ && apt install --yes mongodb-org-shell \
+ && apt clean
+
+# MongoSH
+RUN wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
+ && dpkg --install mongosh_0.5.2_amd64.deb \
+ && rm *.deb \
+ && apt clean
 
 # Kubernetes
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
  && echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
  && apt update \
- && apt install --yes kubectl kubeadm \
- && kubectl completion bash >/etc/bash_completion.d/kubectl
+ && apt install --yes kubectl \
+ && kubectl completion bash >/etc/bash_completion.d/kubectl \
+ && apt clean
 
 # kubectx & kubens
 RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /usr/local/bin/kubens \
@@ -55,7 +63,16 @@ RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /u
 RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
  && apt update \
- && apt install --yes google-cloud-sdk
+ && apt install --yes google-cloud-sdk \
+ && apt clean
+
+# Vault
+RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
+ && echo "deb [arch=amd64] https://apt.releases.hashicorp.com buster main" | tee -a /etc/apt/sources.list.d/hashicorp.list \
+ && apt update \
+ && apt install --yes vault \
+ && setcap cap_ipc_lock= /usr/bin/vault \
+ && apt clean
 
 # # OpenShift CLI
 # RUN OC_VERSION="v3.11.0" \
@@ -88,7 +105,8 @@ RUN BOMBARDIER_VERSION="v1.2.4" \
 RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.0.1_all.deb -O \
  && apt install --yes openjdk-11-jre-headless \
  && apt install ./jmxterm*deb \
- && rm jmxterm*deb
+ && rm jmxterm*deb \
+ && apt clean
 
 # RabbitMQ Admin
 RUN curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.8.2/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \

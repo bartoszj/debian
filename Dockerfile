@@ -12,7 +12,7 @@ RUN apt update \
  && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file \
     dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
-    python3 python2 python-is-python2 \
+    python3 python2 python-is-python3 \
     jq jid \
     # groff
     mariadb-client mycli postgresql-client redis-tools apache2-utils \
@@ -101,12 +101,12 @@ RUN BOMBARDIER_VERSION="v1.2.4" \
 # RUN curl -sL https://github.com/rabbitmq/rabbitmq-perf-test/releases/download/v2.8.1/perf-test_linux_x86_64 -o /usr/local/bin/rabbit-perf-test \
 #  && chmod 755 /usr/local/bin/rabbit-perf-test
 
-# JMX Term
-RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.0.1_all.deb -O \
- && apt install --yes openjdk-11-jre-headless \
- && apt install ./jmxterm*deb \
- && rm jmxterm*deb \
- && apt clean
+# # JMX Term
+# RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.0.1_all.deb -O \
+#  && apt install --yes openjdk-11-jre-headless \
+#  && apt install ./jmxterm*deb \
+#  && rm jmxterm*deb \
+#  && apt clean
 
 # RabbitMQ Admin
 RUN curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.8.2/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \

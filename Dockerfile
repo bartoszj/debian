@@ -16,7 +16,7 @@ RUN apt update \
     jq \
     # jid groff
     mariadb-client mycli postgresql-client redis-tools apache2-utils \
- && apt install --yes --no-install-recommends links2 lynx \
+    links2 lynx \
  && apt-file update \
  && apt clean
 
@@ -24,17 +24,19 @@ RUN apt update \
 RUN sed -i"" -e "s|default-character-set|# default-character-set|g" /etc/mysql/mariadb.conf.d/50-client.cnf
 
 # MongoDB
-RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+RUN if [ $(dpkg --print-architecture) == "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
  && apt update \
  && apt install --yes mongodb-org-shell \
- && apt clean
+ && apt clean \
+ ; fi
 
 # MongoSH
-RUN wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
+RUN if [ $(dpkg --print-architecture) == "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
  && dpkg --install mongosh_0.5.2_amd64.deb \
  && rm *.deb \
- && apt clean
+ && apt clean \
+ ; fi
 
 # Kubernetes
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
@@ -67,12 +69,11 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
  && apt clean
 
 # Vault
-RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
- && echo "deb [arch=amd64] https://apt.releases.hashicorp.com buster main" | tee -a /etc/apt/sources.list.d/hashicorp.list \
- && apt update \
- && apt install --yes vault \
- && setcap cap_ipc_lock= /usr/bin/vault \
- && apt clean
+RUN VAULT_VERSION=1.6.0 \
+ && wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
+ && unzip vault_linux.zip \
+ && mv vault /usr/local/bin/ \
+ && rm vault_linux.zip
 
 # # OpenShift CLI
 # RUN OC_VERSION="v3.11.0" \
@@ -85,8 +86,8 @@ RUN curl -fsSL https://apt.releases.hashicorp.com/gpg | apt-key add - \
 #  && rm -rf openshift-origin-cli
 
 # Bombardier
-RUN BOMBARDIER_VERSION="v1.2.4" \
- && wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-amd64 -O /usr/local/bin/bombardier \
+RUN BOMBARDIER_VERSION="v1.2.5" \
+ && wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-$(dpkg --print-architecture) -O /usr/local/bin/bombardier \
  && chmod 755 /usr/local/bin/bombardier
 
 # # Elasticsearch Stress Test
@@ -109,15 +110,18 @@ RUN BOMBARDIER_VERSION="v1.2.4" \
 #  && apt clean
 
 # RabbitMQ Admin
-RUN curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v3.8.2/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \
+RUN RABBITMQ_ADMIN_VERSION=3.8.2 \
+ && curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v${RABBITMQ_ADMIN_VERSION}/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \
  && chmod 755 /usr/local/bin/rabbitmqadmin \
  && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
 
 # go-zkcli
-RUN curl -sL https://github.com/outbrain/zookeepercli/releases/download/v1.0.12/zookeepercli-linux-amd64-binary.tar.gz -o zookeepercli-linux-amd64-binary.tar.gz \
- && tar -zxvf zookeepercli-linux-amd64-binary.tar.gz \
+RUN if [ $(dpkg --print-architecture) == "amd64" ]; then GO_ZKCLI_VERSION=1.0.12 \
+ && curl -sL https://github.com/outbrain/zookeepercli/releases/download/v${GO_ZKCLI_VERSION}/zookeepercli-linux-$(dpkg --print-architecture)-binary.tar.gz -o zookeepercli-linux-binary.tar.gz \
+ && tar -zxvf zookeepercli-linux-binary.tar.gz \
  && mv zookeepercli /usr/local/bin/ \
- && rm -f *.tar.gz
+ && rm -f *.tar.gz \
+ ; fi
 
 # User dir settings
 RUN mkdir -p ${HOME} \

@@ -4,4 +4,6 @@ build:
 	DOCKER_BUILDKIT=1 docker build -t d .
 
 buildx:
-	docker buildx build --platform linux/amd64,linux/arm64 -t dd .
+	# docker buildx build --platform linux/amd64,linux/arm64 -t dd .
+	docker buildx build --platform linux/arm64 -t bartoszj/debian . --push
+	# docker buildx build --platform linux/amd64,linux/arm64 -t bartoszj/debian . --push

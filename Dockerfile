@@ -24,7 +24,7 @@ RUN apt update \
 RUN sed -i"" -e "s|default-character-set|# default-character-set|g" /etc/mysql/mariadb.conf.d/50-client.cnf
 
 # MongoDB
-RUN if [ $(dpkg --print-architecture) == "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
  && apt update \
  && apt install --yes mongodb-org-shell \
@@ -32,7 +32,7 @@ RUN if [ $(dpkg --print-architecture) == "amd64" ]; then wget -qO - https://www.
  ; fi
 
 # MongoSH
-RUN if [ $(dpkg --print-architecture) == "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
+RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
  && dpkg --install mongosh_0.5.2_amd64.deb \
  && rm *.deb \
  && apt clean \
@@ -116,7 +116,7 @@ RUN RABBITMQ_ADMIN_VERSION=3.8.2 \
  && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
 
 # go-zkcli
-RUN if [ $(dpkg --print-architecture) == "amd64" ]; then GO_ZKCLI_VERSION=1.0.12 \
+RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=1.0.12 \
  && curl -sL https://github.com/outbrain/zookeepercli/releases/download/v${GO_ZKCLI_VERSION}/zookeepercli-linux-$(dpkg --print-architecture)-binary.tar.gz -o zookeepercli-linux-binary.tar.gz \
  && tar -zxvf zookeepercli-linux-binary.tar.gz \
  && mv zookeepercli /usr/local/bin/ \

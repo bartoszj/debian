@@ -5,6 +5,7 @@ LABEL maintainer Bartosz Janda, bjanda@pgs-soft.com
 ENV HOME /home/debian
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
+ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd

@@ -9,7 +9,7 @@ WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
- && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less \
     dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
@@ -67,6 +67,17 @@ RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.
  && apt update \
  && apt install --yes google-cloud-sdk \
  && apt clean
+
+# # AWS CLI
+# RUN apt update \
+#  && apt install --yes --no-install-recommends groff \
+#  && if [ $(dpkg --print-architecture) = "amd64" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+#     ; elif [ $(dpkg --print-architecture) = "arm64" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" \
+#     ; fi \
+#   && unzip awscliv2.zip \
+#   && ./aws/install \
+#   && rm -rf aws awscliv2.zip \
+#   && apt clean
 
 # Vault
 RUN VAULT_VERSION=1.6.0 \

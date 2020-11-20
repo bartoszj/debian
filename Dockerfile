@@ -123,6 +123,9 @@ RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=
  && rm -f *.tar.gz \
  ; fi
 
+# Vault completion
+RUN echo "if [ -f /usr/local/bin/vault ]; then complete -C /usr/local/bin/vault vault; fi" >> /etc/bash.bashrc
+
 # User dir settings
 RUN mkdir -p ${HOME} \
  && cp /etc/skel/.* ${HOME} 2>/dev/null || true \

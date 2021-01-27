@@ -15,29 +15,49 @@ RUN apt update \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
     jq \
-    # jid groff
+    # jid
     mariadb-client mycli postgresql-client redis-tools apache2-utils \
     links2 lynx \
  && apt-file update \
- && apt clean
+ && apt clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # Fix Mariadb charset
 RUN sed -i"" -e "s|default-character-set|# default-character-set|g" /etc/mysql/mariadb.conf.d/50-client.cnf
 
-# MongoDB
-RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
- && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
- && apt update \
- && apt install --yes mongodb-org-shell \
+# AWS
+RUN apt update \
+ && apt install --yes --no-install-recommends groff-base less \
  && apt clean \
- ; fi
+ && rm -rf /var/lib/apt/lists/* \
+ && if [ $(dpkg --print-architecture) = "amd64" ]; then export AWS_ARCH="x86_64"; else export AWS_ARCH="aarch64"; fi \
+ && curl "https://awscli.amazonaws.com/awscli-exe-linux-${AWS_ARCH}.zip" -o "awscliv2.zip" \
+ && unzip awscliv2.zip \
+ && ./aws/install \
+ && rm -rf aws awscliv2.zip \
+ && echo "complete -C '/usr/local/bin/aws_completer' aws" > /etc/bash_completion.d/aws
 
-# MongoSH
-RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
- && dpkg --install mongosh_0.5.2_amd64.deb \
- && rm *.deb \
- && apt clean \
- ; fi
+# # Google Cloud SDK
+# RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
+#  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
+#  && apt update \
+#  && apt install --yes google-cloud-sdk \
+#  && apt clean
+
+# # MongoDB
+# RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
+#  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
+#  && apt update \
+#  && apt install --yes mongodb-org-shell \
+#  && apt clean \
+#  ; fi
+
+# # MongoSH
+# RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
+#  && dpkg --install mongosh_0.5.2_amd64.deb \
+#  && rm *.deb \
+#  && apt clean \
+#  ; fi
 
 # Kubernetes
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
@@ -62,30 +82,13 @@ RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /u
 #  && ./get_helm.sh --version "${HELM_VERSION}" \
 #  && rm get_helm.sh
 
-# Google Cloud SDK
-RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
- && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
- && apt update \
- && apt install --yes google-cloud-sdk \
- && apt clean
-
-# # AWS CLI
-# RUN apt update \
-#  && apt install --yes --no-install-recommends groff \
-#  && if [ $(dpkg --print-architecture) = "amd64" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
-#     ; elif [ $(dpkg --print-architecture) = "arm64" ]; then curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip" \
-#     ; fi \
-#   && unzip awscliv2.zip \
-#   && ./aws/install \
-#   && rm -rf aws awscliv2.zip \
-#   && apt clean
-
 # Vault
-RUN VAULT_VERSION=1.6.0 \
+RUN VAULT_VERSION=1.6.1 \
  && wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
  && unzip vault_linux.zip \
  && mv vault /usr/local/bin/ \
- && rm vault_linux.zip
+ && rm vault_linux.zip \
+ && echo "if [ -f /usr/local/bin/vault ]; then complete -C /usr/local/bin/vault vault; fi" >> /etc/bash.bashrc
 
 # # OpenShift CLI
 # RUN OC_VERSION="v3.11.0" \
@@ -115,17 +118,17 @@ RUN BOMBARDIER_VERSION="v1.2.5" \
 #  && chmod 755 /usr/local/bin/rabbit-perf-test
 
 # # JMX Term
-# RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.1/jmxterm_1.0.1_all.deb -O \
+# RUN curl -L https://github.com/jiaqi/jmxterm/releases/download/v1.0.2/jmxterm_1.0.2_all.deb -O \
 #  && apt install --yes openjdk-11-jre-headless \
 #  && apt install ./jmxterm*deb \
 #  && rm jmxterm*deb \
 #  && apt clean
 
-# RabbitMQ Admin
-RUN RABBITMQ_ADMIN_VERSION=3.8.2 \
- && curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v${RABBITMQ_ADMIN_VERSION}/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \
- && chmod 755 /usr/local/bin/rabbitmqadmin \
- && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
+# # RabbitMQ Admin
+# RUN RABBITMQ_ADMIN_VERSION=3.8.2 \
+#  && curl -sL https://raw.githubusercontent.com/rabbitmq/rabbitmq-management/v${RABBITMQ_ADMIN_VERSION}/bin/rabbitmqadmin -o /usr/local/bin/rabbitmqadmin \
+#  && chmod 755 /usr/local/bin/rabbitmqadmin \
+#  && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
 
 # go-zkcli
 RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=1.0.12 \
@@ -135,8 +138,12 @@ RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=
  && rm -f *.tar.gz \
  ; fi
 
-# Vault completion
-RUN echo "if [ -f /usr/local/bin/vault ]; then complete -C /usr/local/bin/vault vault; fi" >> /etc/bash.bashrc
+# Argo
+RUN ARGO_VERSION=2.12.6 \
+ && curl -sL https://github.com/argoproj/argo/releases/download/v${ARGO_VERSION}/argo-linux-$(dpkg --print-architecture).gz -o argo.gz \
+ && gunzip argo.gz \
+ && chmod 755 argo \
+ && mv argo /usr/local/bin/
 
 # User dir settings
 RUN mkdir -p ${HOME} \

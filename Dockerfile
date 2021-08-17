@@ -16,7 +16,7 @@ RUN apt update \
     python3 python-is-python3 \
     jq \
     # jid
-    mariadb-client mycli postgresql-client redis-tools apache2-utils \
+    mariadb-client mycli postgresql-client redis-tools nghttp2-client \
     links2 lynx \
  && apt-file update \
  && apt clean \

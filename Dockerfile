@@ -130,20 +130,13 @@ RUN BOMBARDIER_VERSION="v1.2.5" \
 #  && chmod 755 /usr/local/bin/rabbitmqadmin \
 #  && rabbitmqadmin --bash-completion > /etc/bash_completion.d/rabbitmqadmin
 
-# go-zkcli
-RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=1.0.12 \
- && curl -sL https://github.com/outbrain/zookeepercli/releases/download/v${GO_ZKCLI_VERSION}/zookeepercli-linux-$(dpkg --print-architecture)-binary.tar.gz -o zookeepercli-linux-binary.tar.gz \
- && tar -zxvf zookeepercli-linux-binary.tar.gz \
- && mv zookeepercli /usr/local/bin/ \
- && rm -f *.tar.gz \
- ; fi
-
-# Argo
-RUN ARGO_VERSION=2.12.6 \
- && curl -sL https://github.com/argoproj/argo/releases/download/v${ARGO_VERSION}/argo-linux-$(dpkg --print-architecture).gz -o argo.gz \
- && gunzip argo.gz \
- && chmod 755 argo \
- && mv argo /usr/local/bin/
+# # go-zkcli
+# RUN if [ $(dpkg --print-architecture) = "amd64" ]; then export GO_ZKCLI_VERSION=1.0.12 \
+#  && curl -sL https://github.com/outbrain/zookeepercli/releases/download/v${GO_ZKCLI_VERSION}/zookeepercli-linux-$(dpkg --print-architecture)-binary.tar.gz -o zookeepercli-linux-binary.tar.gz \
+#  && tar -zxvf zookeepercli-linux-binary.tar.gz \
+#  && mv zookeepercli /usr/local/bin/ \
+#  && rm -f *.tar.gz \
+#  ; fi
 
 # User dir settings
 RUN mkdir -p ${HOME} \

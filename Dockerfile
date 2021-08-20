@@ -10,7 +10,7 @@ WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
- && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less iproute2 \
     dnsutils gnupg whois wget curl telnet \
     apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python-is-python3 \

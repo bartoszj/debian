@@ -10,9 +10,10 @@ WORKDIR ${HOME}
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
+ && apt upgrade --yes \
  && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less iproute2 \
-    dnsutils gnupg whois wget curl telnet \
-    apt-file unzip lshw git openssh-client socat netcat netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
+    dnsutils gnupg whois wget curl ca-certificates telnet \
+    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
     jq \
     # jid
@@ -37,6 +38,15 @@ RUN apt update \
  && rm -rf aws awscliv2.zip \
  && echo "complete -C '/usr/local/bin/aws_completer' aws" > /etc/bash_completion.d/aws
 
+# Azure CLI
+# https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
+RUN apt update \
+ && curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null \
+ && AZ_REPO=bullseye; echo "deb https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list \
+ && apt update \
+ && apt install --yes azure-cli \
+ && apt clean
+
 # # Google Cloud SDK
 # RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list \
 #  && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key --keyring /usr/share/keyrings/cloud.google.gpg add - \
@@ -45,19 +55,14 @@ RUN apt update \
 #  && apt clean
 
 # # MongoDB
-# RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -qO - https://www.mongodb.org/static/pgp/server-4.4.asc | apt-key add - \
-#  && echo "deb http://repo.mongodb.org/apt/debian buster/mongodb-org/4.4 main" | tee /etc/apt/sources.list.d/mongodb-org-4.4.list \
+# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
+# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+# RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add - \
+#  && echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-5.0.list \
 #  && apt update \
-#  && apt install --yes mongodb-org-shell \
-#  && apt clean \
-#  ; fi
-
-# # MongoSH
-# RUN if [ $(dpkg --print-architecture) = "amd64" ]; then wget -c https://downloads.mongodb.com/compass/mongosh_0.5.2_amd64.deb \
-#  && dpkg --install mongosh_0.5.2_amd64.deb \
-#  && rm *.deb \
-#  && apt clean \
-#  ; fi
+#  && apt install --yes mongodb-org-shell mongodb-mongosh \
+#  && if [ $(dpkg --print-architecture) = "amd64" ]; then apt install --yes mongocli; fi \
+#  && apt clean
 
 # Kubernetes
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
@@ -83,7 +88,7 @@ RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /u
 #  && rm get_helm.sh
 
 # Vault
-RUN VAULT_VERSION=1.6.1 \
+RUN VAULT_VERSION=1.8.4 \
  && wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
  && unzip vault_linux.zip \
  && mv vault /usr/local/bin/ \

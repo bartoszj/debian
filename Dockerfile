@@ -8,12 +8,19 @@ ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
+ARG KUBELOGIN_VERSION=0.0.20
+ARG KUBECTL_VERSION=1.24.3-00
+ARG KUBECTX_VERSION=0.9.4
+ARG HELM_VERSION=3.9.4
+ARG VAULT_VERSION=1.11.3
+ARG BOMBARDIER_VERSION="v1.2.5"
+
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt upgrade --yes \
  && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
-    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
+    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
     jq \
     # jid
@@ -64,32 +71,45 @@ RUN apt update \
 #  && if [ $(dpkg --print-architecture) = "amd64" ]; then apt install --yes mongocli; fi \
 #  && apt clean
 
+# Kubelogin
+# https://github.com/Azure/kubelogin
+RUN curl -fSL https://github.com/Azure/kubelogin/releases/download/v${KUBELOGIN_VERSION}/kubelogin-linux-$(dpkg --print-architecture).zip -o kubelogin-linux-$(dpkg --print-architecture).zip \
+ && unzip -d kubelogin kubelogin-linux-$(dpkg --print-architecture).zip \
+ && mv kubelogin/bin/linux_$(dpkg --print-architecture)/kubelogin /usr/local/bin/ \
+ && rm -rf kubelogin kubelogin-linux-$(dpkg --print-architecture).zip
+
 # Kubernetes
 RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
  && echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
  && apt update \
- && apt install --yes kubectl \
+ && apt install --yes kubectl=${KUBECTL_VERSION} \
  && kubectl completion bash >/etc/bash_completion.d/kubectl \
- && apt clean
+ && rm -rf /var/lib/apt/lists/*
 
-# kubectx & kubens
-RUN curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens -o /usr/local/bin/kubens \
- && curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx -o /usr/local/bin/kubectx \
- && chmod 755 /usr/local/bin/kubens \
- && chmod 755 /usr/local/bin/kubectx \
- && curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubens.bash -o /etc/bash_completion.d/kubens \
- && curl -s https://raw.githubusercontent.com/ahmetb/kubectx/master/completion/kubectx.bash -o /etc/bash_completion.d/kubectx
+# Kubectx & kubens
+RUN if [ $(dpkg --print-architecture) = "amd64" ]; then \
+ curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubectx_v${KUBECTX_VERSION}_linux_x86_64.tar.gz -o kubectx.tgz \
+ && curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubens_v${KUBECTX_VERSION}_linux_x86_64.tar.gz -o kubens.tgz \
+ ; else \
+ curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubectx_v${KUBECTX_VERSION}_linux_$(dpkg --print-architecture).tar.gz -o kubectx.tgz \
+ && curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubens_v${KUBECTX_VERSION}_linux_$(dpkg --print-architecture).tar.gz -o kubens.tgz \
+ ; fi \
+ && mkdir kubectx kubens \
+ && tar -C kubectx -xzf kubectx.tgz \
+ && tar -C kubens -xzf kubens.tgz \
+ && mv kubectx/kubectx /usr/local/bin \
+ && mv kubens/kubens /usr/local/bin \
+ && rm -rf kubectx kubens kubectx.tgz kubens.tgz
 
-# # Helm
-# RUN HELM_VERSION="v2.13.1" \
-#  && curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get > get_helm.sh \
-#  && chmod 700 get_helm.sh \
-#  && ./get_helm.sh --version "${HELM_VERSION}" \
-#  && rm get_helm.sh
+# Helm
+RUN curl -fSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-$(dpkg --print-architecture).tar.gz -o helm.tar.gz \
+ && mkdir helm \
+ && tar -C helm --strip-components=1 -xzf helm.tar.gz \
+ && mv helm/helm /usr/local/bin \
+ && rm -rf helm helm.tar.gz
 
 # Vault
-RUN VAULT_VERSION=1.8.4 \
- && wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
+RUN wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
  && unzip vault_linux.zip \
  && mv vault /usr/local/bin/ \
  && rm vault_linux.zip \
@@ -106,8 +126,7 @@ RUN VAULT_VERSION=1.8.4 \
 #  && rm -rf openshift-origin-cli
 
 # Bombardier
-RUN BOMBARDIER_VERSION="v1.2.5" \
- && wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-$(dpkg --print-architecture) -O /usr/local/bin/bombardier \
+RUN wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-$(dpkg --print-architecture) -O /usr/local/bin/bombardier \
  && chmod 755 /usr/local/bin/bombardier
 
 # # Elasticsearch Stress Test

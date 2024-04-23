@@ -8,12 +8,12 @@ ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
-ARG KUBELOGIN_VERSION=0.0.20
-ARG KUBECTL_VERSION=1.24.3-00
-ARG KUBECTX_VERSION=0.9.4
-ARG HELM_VERSION=3.9.4
-ARG VAULT_VERSION=1.11.3
-ARG BOMBARDIER_VERSION="v1.2.5"
+ARG KUBELOGIN_VERSION=0.1.3
+ARG KUBECTL_VERSION=1.30
+ARG KUBECTX_VERSION=0.9.5
+ARG HELM_VERSION=3.14.0
+ARG VAULT_VERSION=1.16.1
+ARG BOMBARDIER_VERSION="v1.2.6"
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
@@ -48,8 +48,9 @@ RUN apt update \
 # Azure CLI
 # https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-linux?pivots=apt
 RUN apt update \
- && curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null \
- && AZ_REPO=bullseye; echo "deb https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list \
+ && curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /etc/apt/keyrings/microsoft.gpg \
+ && chmod go+r /etc/apt/keyrings/microsoft.gpg \
+ && AZ_DIST=bookworm; echo "Types: deb\nURIs: https://packages.microsoft.com/repos/azure-cli/\nSuites: ${AZ_DIST}\nComponents: main\nArchitectures: $(dpkg --print-architecture)\nSigned-by: /etc/apt/keyrings/microsoft.gpg" | tee /etc/apt/sources.list.d/azure-cli.sources \
  && apt update \
  && apt install --yes azure-cli \
  && apt clean
@@ -61,15 +62,15 @@ RUN apt update \
 #  && apt install --yes google-cloud-sdk \
 #  && apt clean
 
-# # MongoDB
-# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
-# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
-# RUN wget -qO - https://www.mongodb.org/static/pgp/server-5.0.asc | apt-key add - \
-#  && echo "deb http://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-5.0.list \
-#  && apt update \
-#  && apt install --yes mongodb-org-shell mongodb-mongosh \
-#  && if [ $(dpkg --print-architecture) = "amd64" ]; then apt install --yes mongocli; fi \
-#  && apt clean
+# MongoDB
+# https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
+# https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+RUN curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor \
+ && echo "deb [ signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] http://repo.mongodb.org/apt/debian bookworm/mongodb-org/7.0 main" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+ && apt update \
+ && apt install --yes mongodb-org-shell mongodb-mongosh mongodb-org-tools \
+ && if [ $(dpkg --print-architecture) = "amd64" ]; then apt install --yes mongocli; fi \
+ && apt clean
 
 # Kubelogin
 # https://github.com/Azure/kubelogin
@@ -79,10 +80,12 @@ RUN curl -fSL https://github.com/Azure/kubelogin/releases/download/v${KUBELOGIN_
  && rm -rf kubelogin kubelogin-linux-$(dpkg --print-architecture).zip
 
 # Kubernetes
-RUN curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - \
- && echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list \
+RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBECTL_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+ && chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
+ && echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${KUBECTL_VERSION}/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list \
+ && chmod 644 /etc/apt/sources.list.d/kubernetes.list \
  && apt update \
- && apt install --yes kubectl=${KUBECTL_VERSION} \
+ && apt install --yes kubectl \
  && kubectl completion bash >/etc/bash_completion.d/kubectl \
  && rm -rf /var/lib/apt/lists/*
 

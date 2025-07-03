@@ -20,7 +20,7 @@ RUN apt update \
  && apt upgrade --yes \
  && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
-    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 tcpdump kafkacat nfs-common \
+    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
     jq \
     # jid

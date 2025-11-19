@@ -1,6 +1,6 @@
 # docker build -t bartoszj/debian .
 
-FROM debian:testing
+FROM debian:stable
 LABEL maintainer Bartosz Janda, bjanda@pgs-soft.com
 ENV HOME /home/debian
 ENV LC_ALL C.UTF-8
@@ -8,17 +8,28 @@ ENV LANG C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
-ARG KUBELOGIN_VERSION=0.1.3
-ARG KUBECTL_VERSION=1.30
+# https://github.com/Azure/kubelogin/releases
+ARG KUBELOGIN_VERSION=0.2.12
+
+# https://kubernetes.io/releases/
+ARG KUBECTL_VERSION=1.34
+
+# https://github.com/ahmetb/kubectx/releases
 ARG KUBECTX_VERSION=0.9.5
-ARG HELM_VERSION=3.14.0
-ARG VAULT_VERSION=1.16.1
-ARG BOMBARDIER_VERSION="v1.2.6"
+
+# https://github.com/helm/helm/releases
+ARG HELM_VERSION=4.0.0
+
+# https://github.com/hashicorp/vault/releases
+ARG VAULT_VERSION=1.21.0
+
+# https://github.com/codesenberg/bombardier/releases
+ARG BOMBARDIER_VERSION="v2.0.2"
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt upgrade --yes \
- && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop dstat file less iproute2 \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop pcp file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
     apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kafkacat nfs-common \
     python3 python-is-python3 \
@@ -26,6 +37,7 @@ RUN apt update \
     # jid
     mariadb-client mycli postgresql-client redis-tools nghttp2-client \
     links2 lynx \
+    golang-go \
  && apt-file update \
  && apt clean \
  && rm -rf /var/lib/apt/lists/*
@@ -62,14 +74,14 @@ RUN apt update \
 #  && apt install --yes google-cloud-sdk \
 #  && apt clean
 
-# MongoDB
-# https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
-# https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
-RUN curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor \
- && echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
- && apt update \
- && apt install --yes mongocli mongodb-atlas-cli mongodb-mongosh mongodb-database-tools \
- && apt clean
+# # MongoDB
+# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-debian/
+# # https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+# RUN curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg --dearmor \
+#  && echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list \
+#  && apt update \
+#  && apt install --yes mongocli mongodb-atlas-cli mongodb-mongosh mongodb-database-tools \
+#  && apt clean
 
 # Kubelogin
 # https://github.com/Azure/kubelogin
@@ -79,6 +91,7 @@ RUN curl -fSL https://github.com/Azure/kubelogin/releases/download/v${KUBELOGIN_
  && rm -rf kubelogin kubelogin-linux-$(dpkg --print-architecture).zip
 
 # Kubernetes
+# https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-using-native-package-management
 RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBECTL_VERSION}/deb/Release.key | gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
  && chmod 644 /etc/apt/keyrings/kubernetes-apt-keyring.gpg \
  && echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v${KUBECTL_VERSION}/deb/ /" | tee /etc/apt/sources.list.d/kubernetes.list \
@@ -89,6 +102,7 @@ RUN curl -fsSL https://pkgs.k8s.io/core:/stable:/v${KUBECTL_VERSION}/deb/Release
  && rm -rf /var/lib/apt/lists/*
 
 # Kubectx & kubens
+# https://github.com/ahmetb/kubectx
 RUN if [ $(dpkg --print-architecture) = "amd64" ]; then \
  curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubectx_v${KUBECTX_VERSION}_linux_x86_64.tar.gz -o kubectx.tgz \
  && curl -fSL https://github.com/ahmetb/kubectx/releases/download/v${KUBECTX_VERSION}/kubens_v${KUBECTX_VERSION}_linux_x86_64.tar.gz -o kubens.tgz \
@@ -104,6 +118,7 @@ RUN if [ $(dpkg --print-architecture) = "amd64" ]; then \
  && rm -rf kubectx kubens kubectx.tgz kubens.tgz
 
 # Helm
+# https://helm.sh/docs/intro/install/#from-apt-debianubuntu
 RUN curl -fSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-$(dpkg --print-architecture).tar.gz -o helm.tar.gz \
  && mkdir helm \
  && tar -C helm --strip-components=1 -xzf helm.tar.gz \
@@ -111,6 +126,7 @@ RUN curl -fSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-$(dpkg --print-arc
  && rm -rf helm helm.tar.gz
 
 # Vault
+# https://developer.hashicorp.com/vault/downloads#linux
 RUN wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
  && unzip vault_linux.zip \
  && mv vault /usr/local/bin/ \

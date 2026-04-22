@@ -1,10 +1,10 @@
 # docker build -t bartoszj/debian .
 
 FROM debian:stable
-LABEL maintainer Bartosz Janda, bjanda@pgs-soft.com
-ENV HOME /home/debian
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
+LABEL maintainer="Bartosz Janda, bjanda@pgs-soft.com"
+ENV HOME=/home/debian
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
 ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
@@ -26,12 +26,15 @@ ARG VAULT_VERSION=1.21.0
 # https://github.com/codesenberg/bombardier/releases
 ARG BOMBARDIER_VERSION="v2.0.2"
 
+# https://github.com/deviceinsight/kafkactl/releases
+ARG KAFKA_CTL=5.18.0
+
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt upgrade --yes \
  && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop pcp file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
-    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kafkacat nfs-common \
+    apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kcat nfs-common \
     python3 python-is-python3 \
     jq \
     # jid
@@ -146,6 +149,13 @@ RUN wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_
 # Bombardier
 RUN wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-$(dpkg --print-architecture) -O /usr/local/bin/bombardier \
  && chmod 755 /usr/local/bin/bombardier
+
+# kafkactl
+RUN wget -c https://github.com/deviceinsight/kafkactl/releases/download/v${KAFKA_CTL}/kafkactl_${KAFKA_CTL}_linux_$(dpkg --print-architecture).deb \
+ && apt install ./kafkactl_${KAFKA_CTL}_linux_$(dpkg --print-architecture).deb \
+ && rm kafkactl_${KAFKA_CTL}_linux_$(dpkg --print-architecture).deb \
+ && apt clean
+
 
 # # Elasticsearch Stress Test
 # RUN curl -s https://raw.githubusercontent.com/logzio/elasticsearch-stress-test/master/elasticsearch-stress-test.py -o /usr/local/bin/elasticsearch-stress-test \

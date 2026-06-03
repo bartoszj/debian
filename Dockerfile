@@ -9,30 +9,30 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR ${HOME}
 
 # https://github.com/Azure/kubelogin/releases
-ARG KUBELOGIN_VERSION=0.2.12
+ARG KUBELOGIN_VERSION=0.2.18
 
 # https://kubernetes.io/releases/
-ARG KUBECTL_VERSION=1.34
+ARG KUBECTL_VERSION=1.36
 
 # https://github.com/ahmetb/kubectx/releases
-ARG KUBECTX_VERSION=0.9.5
+ARG KUBECTX_VERSION=0.11.0
 
 # https://github.com/helm/helm/releases
-ARG HELM_VERSION=4.0.0
+ARG HELM_VERSION=4.2.0
 
 # https://github.com/hashicorp/vault/releases
-ARG VAULT_VERSION=1.21.0
+ARG VAULT_VERSION=2.0.1
 
 # https://github.com/codesenberg/bombardier/releases
 ARG BOMBARDIER_VERSION="v2.0.2"
 
 # https://github.com/deviceinsight/kafkactl/releases
-ARG KAFKA_CTL=5.18.0
+ARG KAFKA_CTL=5.19.0
 
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt upgrade --yes \
- && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim procps htop pcp file less iproute2 \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim ripgrep procps htop pcp file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
     apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kcat nfs-common \
     python3 python-is-python3 \

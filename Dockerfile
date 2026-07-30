@@ -23,8 +23,17 @@ ARG HELM_VERSION=4.2.0
 # https://github.com/hashicorp/vault/releases
 ARG VAULT_VERSION=2.0.1
 
-# https://github.com/codesenberg/bombardier/releases
-ARG BOMBARDIER_VERSION="v2.0.2"
+# https://github.com/grafana/k6/releases
+ARG K6_VERSION="v2.1.0"
+
+# https://github.com/tsenart/vegeta/releases
+ARG VEGETA_VERSION="12.13.0"
+
+# https://github.com/hatoo/oha/releases
+ARG OHA_VERSION="v1.15.0"
+
+# https://github.com/rakyll/hey/releases (always the newest is installed)
+ARG HEY_VERSION="v0.1.5"
 
 # https://github.com/deviceinsight/kafkactl/releases
 ARG KAFKA_CTL=5.19.0
@@ -131,9 +140,10 @@ RUN curl -fSL https://get.helm.sh/helm-v${HELM_VERSION}-linux-$(dpkg --print-arc
 # Vault
 # https://developer.hashicorp.com/vault/downloads#linux
 RUN wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_VERSION}_linux_$(dpkg --print-architecture).zip -O vault_linux.zip \
- && unzip vault_linux.zip \
- && mv vault /usr/local/bin/ \
+ && unzip vault_linux.zip -d vault \
+ && mv vault/vault /usr/local/bin/ \
  && rm vault_linux.zip \
+ && rm -rf vault \
  && echo "if [ -f /usr/local/bin/vault ]; then complete -C /usr/local/bin/vault vault; fi" >> /etc/bash.bashrc
 
 # # OpenShift CLI
@@ -146,9 +156,27 @@ RUN wget -c https://releases.hashicorp.com/vault/${VAULT_VERSION}/vault_${VAULT_
 #  && rm -f openshift-origin-cli.tar.gz \
 #  && rm -rf openshift-origin-cli
 
-# Bombardier
-RUN wget -c https://github.com/codesenberg/bombardier/releases/download/${BOMBARDIER_VERSION}/bombardier-linux-$(dpkg --print-architecture) -O /usr/local/bin/bombardier \
- && chmod 755 /usr/local/bin/bombardier
+# k6
+RUN wget -c https://github.com/grafana/k6/releases/download/${K6_VERSION}/k6-${K6_VERSION}-linux-$(dpkg --print-architecture).tar.gz -O k6.tar.gz \
+ && tar --strip-components=1 -xzf k6.tar.gz \
+ && mv k6 /usr/local/bin/ \
+ && rm k6.tar.gz
+
+# Vegeta
+RUN wget -c https://github.com/tsenart/vegeta/releases/download/v${VEGETA_VERSION}/vegeta_${VEGETA_VERSION}_linux_$(dpkg --print-architecture).tar.gz -O vegeta.tar.gz \
+ && tar -zxvf vegeta.tar.gz \
+ && mv vegeta /usr/local/bin/ \
+ && rm vegeta.tar.gz
+
+# Oha
+RUN wget -c https://github.com/hatoo/oha/releases/download/${OHA_VERSION}/oha-linux-amd64 -O /usr/local/bin/oha \
+ && chmod 755 /usr/local/bin/oha
+
+# Hey (only amd64)
+RUN if [ $(dpkg --print-architecture) = "amd64" ]; then \
+ wget -c https://storage.googleapis.com/hey-releases/hey_linux_amd64 -O /usr/local/bin/hey \
+ && chmod 755 /usr/local/bin/hey \
+ ; fi
 
 # kafkactl
 RUN wget -c https://github.com/deviceinsight/kafkactl/releases/download/v${KAFKA_CTL}/kafkactl_${KAFKA_CTL}_linux_$(dpkg --print-architecture).deb \

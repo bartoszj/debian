@@ -41,7 +41,7 @@ ARG KAFKA_CTL=5.19.0
 RUN chmod g=u /etc/passwd
 RUN apt update \
  && apt upgrade --yes \
- && apt install --yes --no-install-recommends apt-transport-https bash-completion lsb-release vim ripgrep procps htop pcp file less iproute2 \
+ && apt install --yes --no-install-recommends apt-transport-https bash-completion zsh lsb-release vim ripgrep procps htop pcp file less iproute2 \
     dnsutils gnupg whois wget curl ca-certificates telnet \
     apt-file unzip lshw git openssh-client socat netcat-traditional netcat-openbsd nmap stress-ng speedtest-cli iperf iperf3 iputils-ping iputils-tracepath tcpdump kcat nfs-common \
     python3 python-is-python3 \
